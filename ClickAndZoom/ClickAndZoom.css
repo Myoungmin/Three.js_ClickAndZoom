@@ -1,0 +1,18 @@
+/* 전체 페이지 요소에 적용 */
+/* 외곽선 제거, 마진 없음 */
+* {
+    outline: none;
+    margin: 0;
+}
+/* 바디 태그에서 스크롤바가 생길 경우 해당 스크롤바가 보이지 않도록 한다. */
+body {
+    overflow: hidden;
+}
+/* webgl-container 요소가 페이지에 꽉 차도록 스타일 구성 */
+#webgl-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
