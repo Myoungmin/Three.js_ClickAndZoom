@@ -1,0 +1,11 @@
+Model Information:
+* title:	Mazda RX-7
+* source:	https://sketchfab.com/3d-models/mazda-rx-7-45cb02e634ed477a9a04bb19813443f2
+* author:	wallon (https://sketchfab.com/realwallon)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Mazda RX-7" (https://sketchfab.com/3d-models/mazda-rx-7-45cb02e634ed477a9a04bb19813443f2) by wallon (https://sketchfab.com/realwallon) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

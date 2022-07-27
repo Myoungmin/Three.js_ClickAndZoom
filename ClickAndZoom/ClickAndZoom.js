@@ -1,5 +1,6 @@
 import * as Three from '../three.js/three.module.js';
 import { OrbitControls } from '../three.js/OrbitControls.js';
+import { GLTFLoader } from '../three.js/GLTFLoader.js';
 
 class App {
     constructor() {
@@ -84,19 +85,34 @@ class App {
     }
 
     _setupModel() {
-        // 정육면체 Geometry 객체 생성
-        // width, height, depth 인자를 모두 1로 설정하여 생성한다.
-        const geometry = new Three.BoxGeometry(1, 1, 1);
-        // 파란색 material 생성
-        const material = new Three.MeshPhongMaterial({ color: 0x44a88 });
+        const gltfLoader = new GLTFLoader();
 
-        // Geometry와 Material를 이용하여 Mesh가 생성된다.
-        const cube = new Three.Mesh(geometry, material);
+        const items = [
+            { url: "../data/mazda_rx-7/scene.gltf" },
+            { url: "../data/warcraft_3_alliance_footmanfanmade/scene.gltf" },
+        ];
 
-        // 생성한 Mesh를 Scene 객체에 구가
-        this._scene.add(cube);
-        // 다른 메서드에서 참조할 수 있도록 필드에 정의한다.
-        this._cube = cube;
+        items.forEach((item, index) => {
+            gltfLoader.load(item.url, (gltf) => {
+                const obj3d = gltf.scene;
+
+                const box = new Three.Box3().setFromObject(obj3d);
+                // 모델의 높이를 가져온다.
+                const sizeBox = box.max.y - box.min.y;
+                // 높이의 크기를 1로 맞추기 위한 배율
+                const scale = 1 / sizeBox;
+                // position을 적당하게 떨어져 위치 시키기 위해 x 좌표 설정
+                const tx = ((index / (items.length - 1)) - 0.5) * 3;
+                // 높이의 크기를 1로 맞추기 위한 배율로 전체 크기 조정
+                obj3d.scale.set(scale, scale, scale);
+                // 모델 위치 지정
+                obj3d.position.set(tx, -box.min.y * scale, 0);
+
+                // 모델 Scene에 추가
+                this._scene.add(obj3d);
+                obj3d.name = "model";
+            });
+        });
     }
 
     _setupControls() {
