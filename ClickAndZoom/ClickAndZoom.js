@@ -113,6 +113,16 @@ class App {
                 obj3d.name = "model";
             });
         });
+
+        // cylinderGeometry로 Mesh 생성하여 원형판 Scene에 추가
+        const cylinderGeometry = new Three.CylinderGeometry(3.5, 3.5, 0.1, 64);
+        const cylinderMaterial = new Three.MeshStandardMaterial(
+            { color: 0x454545, metalness: 0.5, roughness: 0.5 }
+        );
+        const cylinder = new Three.Mesh(cylinderGeometry, cylinderMaterial);
+
+        cylinder.position.y = -0.05;
+        this._scene.add(cylinder);
     }
 
     _setupControls() {
