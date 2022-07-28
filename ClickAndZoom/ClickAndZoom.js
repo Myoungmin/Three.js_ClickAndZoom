@@ -68,20 +68,22 @@ class App {
     }
 
     _setupLight() {
-        // 광원 색상 설정
-        const color = 0xffffff;
-        // 광원 세기 설정
-        const intensity = 1;
-        // 위 설정을 바탕으로 Directional 광원 객체 생성
-        const light = new Three.DirectionalLight(color, intensity);
-        // 광원 위치 설정
-        light.position.set(-1, 2, 4);
-        // Scene객체에 광원 추가
-        this._scene.add(light);
-
-        // AmbientLight 추가
-        const ambientLight = new Three.AmbientLight(0xffffff, 1);
+        // HemisphereLight 추가
+        const ambientLight = new Three.HemisphereLight(0xffffff, 0x444444, 0.4);
         this._scene.add(ambientLight);
+
+
+        // 모델을 비추는 DirectionalLight 2개 추가
+        const color = 0xffffff;
+        const intensity = 1.5;
+
+        const light1 = new Three.DirectionalLight(color, intensity);
+        light1.position.set(-1.5, 4, 0);
+        this._scene.add(light1);
+
+        const light2 = new Three.DirectionalLight(color, intensity);
+        light2.position.set(1.5, 4, 0);
+        this._scene.add(light2);
     }
 
     _setupModel() {
