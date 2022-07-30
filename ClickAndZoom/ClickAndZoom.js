@@ -2,6 +2,19 @@ import * as Three from '../three.js/three.module.js';
 import { OrbitControls } from '../three.js/OrbitControls.js';
 import { GLTFLoader } from '../three.js/GLTFLoader.js';
 
+// Object3D를 구성하는 요소들의 이름 목록을 표시해주는 메서드
+function dumpObject(obj, lines = [], isLast = true, prefix = '') {
+    const localPrefix = isLast ? '└─' : '├─';
+    lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`);
+    const newPrefix = prefix + (isLast ? '  ' : '│ ');
+    const lastNdx = obj.children.length - 1;
+    obj.children.forEach((child, ndx) => {
+        const isLast = ndx === lastNdx;
+        dumpObject(child, lines, isLast, newPrefix);
+    });
+    return lines;
+}
+
 class App {
     constructor() {
         // id가 webgl-container인 div요소를 얻어와서, 상수에 저장 
@@ -90,13 +103,19 @@ class App {
         const gltfLoader = new GLTFLoader();
 
         const items = [
-            { url: "../data/mazda_rx-7/scene.gltf" },
-            { url: "../data/warcraft_3_alliance_footmanfanmade/scene.gltf" },
+            // 모델 왼쪽 바퀴 removed에 설정
+            { url: "../data/mazda_rx-7/scene.gltf", removed: "front_left_wheel" },
+            // 모델 방패 removed에 설정
+            { url: "../data/warcraft_3_alliance_footmanfanmade/scene.gltf", removed: "Object_27" },
         ];
 
         items.forEach((item, index) => {
             gltfLoader.load(item.url, (gltf) => {
                 const obj3d = gltf.scene;
+
+                // 모델의 특정 요소 제거
+                const removedObj3d = obj3d.getObjectByName(item.removed);
+                removedObj3d.removeFromParent();
 
                 const box = new Three.Box3().setFromObject(obj3d);
                 // 모델의 높이를 가져온다.
@@ -113,6 +132,11 @@ class App {
                 // 모델 Scene에 추가
                 this._scene.add(obj3d);
                 obj3d.name = "model";
+
+                // 모델 크기를 확인해보기 위해 BoxHelper 추가
+                this._scene.add(new Three.BoxHelper(obj3d));
+                // 모델을 구성하는 요소의 이름을 콘솔에 표시
+                console.log(dumpObject(obj3d).join('\n'));
             });
         });
 
