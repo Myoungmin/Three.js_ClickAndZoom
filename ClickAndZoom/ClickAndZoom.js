@@ -33,6 +33,12 @@ class App {
         // canvas 타입의 DOM 객체이다.
         // 문서 객체 모델(DOM, Document Object Model)은 XML이나 HTML 문서에 접근하기 위한 일종의 인터페이스.
         divContainer.appendChild(renderer.domElement);
+
+        // 렌더러의 shadowMap 활성화
+        renderer.shadowMap.enabled = true;
+        // 더 나은 품질의 그림자를 위해 추가하는 코드
+        renderer.shadowMap.type = Three.PCFSoftShadowMap;
+
         // 다른 메서드에서 참조할 수 있도록 필드에 정의한다.
         this._renderer = renderer;
 
@@ -95,7 +101,14 @@ class App {
         this._scene.add(light1);
 
         const light2 = new Three.DirectionalLight(color, intensity);
+        // light2에서만 그림자를 던지도록 설정한다.
+        light2.castShadow = true;
         light2.position.set(1.5, 4, 0);
+        // 좋은 품질의 그림자를 위한 설정들////////////////////////////////////////
+        light2.shadow.mapSize.width = light2.shadow.mapSize.height = 1024 * 10;
+        light2.shadow.radius = 4;
+        light2.shadow.bias = 0.0001;
+        //////////////////////////////////////////////////////////////////////////
         this._scene.add(light2);
     }
 
@@ -133,10 +146,16 @@ class App {
                 this._scene.add(obj3d);
                 obj3d.name = "model";
 
-                // 모델 크기를 확인해보기 위해 BoxHelper 추가
-                this._scene.add(new Three.BoxHelper(obj3d));
-                // 모델을 구성하는 요소의 이름을 콘솔에 표시
-                console.log(dumpObject(obj3d).join('\n'));
+                // // 모델 크기를 확인해보기 위해 BoxHelper 추가
+                // this._scene.add(new Three.BoxHelper(obj3d));
+                // // 모델을 구성하는 요소의 이름을 콘솔에 표시
+                // console.log(dumpObject(obj3d).join('\n'));
+
+                // 모델을 구성하는 모든 요소들에 대해 그림자를 던지고 받을 수 있도록 설정
+                obj3d.traverse(child => {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                });
             });
         });
 
@@ -146,6 +165,9 @@ class App {
             { color: 0x454545, metalness: 0.5, roughness: 0.5 }
         );
         const cylinder = new Three.Mesh(cylinderGeometry, cylinderMaterial);
+
+        // 모델은 그림자를 던지지 않고 받기만 한다.
+        cylinder.receiveShadow = true;
 
         cylinder.position.y = -0.05;
         this._scene.add(cylinder);
