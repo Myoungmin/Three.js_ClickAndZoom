@@ -55,6 +55,8 @@ class App {
         this._setupModel();
         // 마우스 컨트롤 설정
         this._setupControls();
+        // 모델 더블클릭 확인 설정
+        this._setupPicking();
 
 
         // 창 크기가 변경될 때 발생하는 이벤트인 onresize에 App 클래스의 resize 메서드를 연결한다.
@@ -168,10 +170,54 @@ class App {
 
         // 모델은 그림자를 던지지 않고 받기만 한다.
         cylinder.receiveShadow = true;
+        // 모델이 아닌 다른 곳을 더블클릭 시 무대를 확대하기 위해 이름을 지정한다.
+        cylinder.name = "cylinder";
 
         cylinder.position.y = -0.05;
         this._scene.add(cylinder);
     }
+
+    // 클릭 시 어떤 모델이 선택되었는지 확인하는 메서드
+    _setupPicking() {
+        const raycaster = new Three.Raycaster();
+        this._divContainer.addEventListener("dblclick", this._onDblClick.bind(this));
+        this._raycaster = raycaster;
+    }
+
+    // 더블클릭 이벤트 핸들러
+    _onDblClick(event) {
+        // Picking에 필요한 준비 코드
+        const width = this._divContainer.clientWidth;
+        const height = this._divContainer.clientHeight;
+        const xy = {
+            x: (event.offsetX / width) * 2 - 1,
+            y: -(event.offsetY / height) * 2 + 1
+        }
+        this._raycaster.setFromCamera(xy, this._camera);
+
+        // models 배열에 이름이 "model"인 모델들만 담는다.
+        const models = [];
+        this._scene.traverse(obj3d => {
+            if (obj3d.name === "model") {
+                models.push(obj3d);
+            }
+        });
+
+        for (let i = 0; i < models.length; i++) {
+            const car = cars[i];
+            const targets = this._raycaster.intersectObject(car);
+            if (targets.length > 0) {
+                // ToDo : 더블클릭된 모델 확대하는 로직 추가
+                return;
+            }
+        }
+
+        // 더블클릭이 모델에서 이루어지지 못하면 아래 코드 실행
+        const box = this._scene.getObjectByName("cylinder");
+
+        // ToDo : 무대를 확대하는 로직 추가
+    }
+
 
     _setupControls() {
         new OrbitControls(this._camera, this._divContainer);
