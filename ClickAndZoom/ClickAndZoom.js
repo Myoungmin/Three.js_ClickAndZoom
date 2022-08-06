@@ -204,23 +204,58 @@ class App {
         });
 
         for (let i = 0; i < models.length; i++) {
-            const car = cars[i];
-            const targets = this._raycaster.intersectObject(car);
+            const model = models[i];
+            const targets = this._raycaster.intersectObject(model);
             if (targets.length > 0) {
-                // ToDo : 더블클릭된 모델 확대하는 로직 추가
+                // 더블클릭된 모델 확대하는 로직
+                this._zoomFit(model, 70);
                 return;
             }
         }
 
         // 더블클릭이 모델에서 이루어지지 못하면 아래 코드 실행
-        const box = this._scene.getObjectByName("cylinder");
+        const cylinder = this._scene.getObjectByName("cylinder");
 
-        // ToDo : 무대를 확대하는 로직 추가
+        // 무대를 확대하는 로직
+        this._zoomFit(cylinder, 45);
+    }
+
+    // 모델을 확대하는 메서드
+    _zoomFit(object3d, viewAngle) {
+        // 모델의 바운딩박스를 구한다.
+        const box = new Three.Box3().setFromObject(object3d);
+        // 박스를 가로지르는 대각선 길이를 구한다.
+        const sizeBox = box.getSize(new Three.Vector3()).length();
+        // 박스의 중심을 구한다. 카메라가 바라보는 타깃 지점으로 지정할 예정이다.
+        const centerBox = box.getCenter(new Three.Vector3());
+
+        // y축 방향 단위벡터로 방향으로 초기화
+        const direction = new Three.Vector3(0, 1, 0);
+        // 파라미터로 넘겨받은 viewAngle만큼 X축으로 회전한다.
+        direction.applyAxisAngle(new Three.Vector3(1, 0, 0), Three.MathUtils.degToRad(viewAngle));
+
+        // 박스를 가로지르는 대각선 길이의 절반을 halfSizeModel로 설정
+        const halfSizeModel = sizeBox * 0.5;
+        // 카메라의 fov의 절반을 halfov로 설정
+        const halffov = Three.MathUtils.degToRad(this._camera.fov * .5);
+        // 모델을 확대했을 때 거리
+        // 삼각함수를 통해서 거리를 구한다.
+        const distance = halfSizeModel / Math.tan(halffov);
+        // 확대했을 때 카메라의 새로운 위치
+        // direction의 단위 벡터에 distance 값을 곱해주면 거리와 방향의 성질을 갖는 벡터를 얻을 수 있다.
+        // 위치벡터인 centerBox를 더해주면 위치의 성질도 추가
+        // 이렇게 3차원 좌표로 활용가능하다.
+        const newPosition = new Three.Vector3().copy(
+            direction.multiplyScalar(distance).add(centerBox));
+
+        this._camera.position.copy(newPosition);
+        this._contorls.target.copy(centerBox);
     }
 
 
     _setupControls() {
-        new OrbitControls(this._camera, this._divContainer);
+        // _zoomFit 메서드에서 사용할 수 있게 필드화
+        this._contorls = new OrbitControls(this._camera, this._divContainer);
     }
 
     resize() {
@@ -249,6 +284,7 @@ class App {
     update(time) {
         // 밀리초에서 초로 변환
         time *= 0.001;
+        this._contorls.update();
     }
 }
 
