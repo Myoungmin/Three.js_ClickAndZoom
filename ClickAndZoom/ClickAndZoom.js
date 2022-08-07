@@ -248,14 +248,26 @@ class App {
         const newPosition = new Three.Vector3().copy(
             direction.multiplyScalar(distance).add(centerBox));
 
-        this._camera.position.copy(newPosition);
-        this._contorls.target.copy(centerBox);
+        //this._camera.position.copy(newPosition);
+        // 카메라의 위치를 GSAP를 사용하여 0.5초동안 단계적으로 변하도록 설정
+        gsap.to(this._camera.position, { duration: 0.5, x: newPosition.x, y: newPosition.y, z: newPosition.z });
+
+        //this._contorls.target.copy(centerBox);
+        // 카메라가 바라보는 target을 GSAP를 사용하여 0.5초동안 단계적으로 변하도록 설정
+        gsap.to(this._controls.target, {
+            duration: 0.5, x: centerBox.x, y: centerBox.y, z: centerBox.z,
+            // 애니메이션 프레임마다 호출되어 깜빡거림을 방지하기 위한 조치
+            onUpdate: () => {
+                this._camera.lookAt(this._controls.target.x, this._controls.target.y, this._controls.target.z);
+            }
+        }
+        );
     }
 
 
     _setupControls() {
         // _zoomFit 메서드에서 사용할 수 있게 필드화
-        this._contorls = new OrbitControls(this._camera, this._divContainer);
+        this._controls = new OrbitControls(this._camera, this._divContainer);
     }
 
     resize() {
@@ -284,7 +296,7 @@ class App {
     update(time) {
         // 밀리초에서 초로 변환
         time *= 0.001;
-        this._contorls.update();
+        this._controls.update();
     }
 }
 
